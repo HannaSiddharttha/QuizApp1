@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">QuizApp</string>
+    <string name="true_button">True</string>
+    <string name="false_button">False</string>
+    <string name="next_button">False</string>
+    <string name="question_text1">¿La luna es de queso?</string>
+    <string name="question_text_2">El cielo es realmente azul?</string>
+    <string name="question_text_3">La tierra es plana?</string>
+    <string name="question_text_4">Si al juicio a expresidentes?</string>
+    <string name="question_text_5">Fue primero la gallina?</string>
+    <string name="question_text_6">La quesadilla lleva queso?</string>
+
+</resources>
