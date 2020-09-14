@@ -1,6 +1,6 @@
 package com.example.quizapp
 
-data class Question (val strRestId : String, val answer: Boolean)
+data class Question (val strRestId : Int, val answer: Boolean)
 
 
 

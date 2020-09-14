@@ -1,53 +1,28 @@
 package com.example.quizapp
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var textView_contador: TextView
+    private lateinit var questionTextView: TextView
     private lateinit var trueButton : Button
     private lateinit var falseButton : Button
     private lateinit var next_Button : Button
     private lateinit var previous_Button: Button
     private lateinit var textView_answers: TextView
 
+    private val LOG_TAG = "MAINACTIVITY LOG"
 
-    private val question = listOf<Question>(
-        Question("¿La luna es de queso?", false),
-        Question("¿El cielo realmente es azul?", true),
-        Question("¿La tierra es plana?", false),
-        Question("¿Si al juicio de expresidentes?", true),
-        Question("¿Fue primero la gallina?", true),
-        Question("¿La quesadilla lleva queso?", true),
-        Question("¿Los gatos toman leche?", true),
-        Question("¿Todas las serpientes son venenosas?", false),
-        Question("¿Los arabes comen kibis?", false),
-        Question("¿Los daltonicos son inteligentes?", true)
-
-
-
-
-    )
-
-    private val answers = listOf<UserAnswer>(
-        UserAnswer("¿La luna es de queso?", false, false),
-        UserAnswer("¿El cielo realmente es azul?", false, false),
-        UserAnswer("¿La tierra es plana?", false, false),
-        UserAnswer("¿Si al juicio de expresidentes?", false, false),
-        UserAnswer("¿Fue primero la gallina?", false, false),
-        UserAnswer("¿La quesadilla lleva queso?", false, false),
-        UserAnswer("¿Los gatos toman leche?", false, false),
-        UserAnswer("¿Todas las serpientes son venenosas?", false, false),
-        UserAnswer("¿Los arabes comen kibis?", false, false),
-        UserAnswer("¿Los daltonicos son inteligentes?", false, false)
-    )
-    private var currentQuestion =0
+    private val model: GameModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,23 +36,22 @@ class MainActivity : AppCompatActivity() {
         previous_Button = findViewById(R.id.previous_button)
         textView_answers =findViewById(R.id.textView_answers)
 
-        questionTextView.setText(question[currentQuestion].strRestId)
+        questionTextView.setText(getString(model.currentQuestion.strRestId))
+        textView_contador.setText("${model.questionNumber+1}/${model.questionSize}")
 
         trueButton.setOnClickListener { view: View ->
 
             // si no está respondida la pregunta se guarda la respuesta en la lista.
-            if(!answers[currentQuestion].isAnswered) {
-                answers[currentQuestion].answer = true;
-                answers[currentQuestion].isAnswered = true;
+            if(!model.currentAnswer.isAnswered) {
+                model.currentAnswer.answer = true;
+                model.currentAnswer.isAnswered = true;
 
-                textView_contador.setText("${currentQuestion+1}/${answers.size}")
-
-                if(answersFinished()) {
+                if(model.answersFinished()) {
                     // mostrar resultados
                     showResult();
                 }
 
-                val result = if (question[currentQuestion].answer) "CORRECT0" else "INCORRECTO"
+                val result = if (model.currentQuestion.answer) "CORRECT0" else "INCORRECTO"
                 Toast.makeText(
                     this,
                     result,
@@ -94,16 +68,16 @@ class MainActivity : AppCompatActivity() {
 
         falseButton.setOnClickListener { view: View ->
             // si no está respondida la pregunta se guarda la respuesta en la lista.
-            if(!answers[currentQuestion].isAnswered) {
-                answers[currentQuestion].answer = false;
-                answers[currentQuestion].isAnswered = true;
+            if(!model.currentAnswer.isAnswered) {
+                model.currentAnswer.answer = false;
+                model.currentAnswer.isAnswered = true;
 
-                if(answersFinished()) {
+                if(model.answersFinished()) {
                     // mostrar resultados
                     showResult();
                 }
 
-                val result = if (question[currentQuestion].answer) "CORRECT0" else "INCORRECTO"
+                val result = if (model.currentQuestion.answer) "CORRECT0" else "INCORRECTO"
                 Toast.makeText(
                     this,
                     result,
@@ -119,40 +93,48 @@ class MainActivity : AppCompatActivity() {
         }
 
         previous_Button.setOnClickListener { view: View ->
-            currentQuestion = (currentQuestion - 1) % question.size
-            questionTextView.setText(question[currentQuestion].strRestId)
+            model.previousQuestion();
+            textView_contador.setText("${model.questionNumber+1}/${model.questionSize}")
+            questionTextView.setText(model.currentQuestion.strRestId)
         }
 
         next_Button.setOnClickListener { view: View ->
-            currentQuestion = (currentQuestion + 1) % question.size
-            questionTextView.setText(question[currentQuestion].strRestId)
+            model.nextQuestion();
+            textView_contador.setText("${model.questionNumber+1}/${model.questionSize}")
+            questionTextView.setText(model.currentQuestion.strRestId)
         }
       }
 
-    fun answersFinished() : Boolean {
-        for(answer in answers) {
-            if(!answer.isAnswered) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     fun showResult() {
-        var correct_answers : Int;
-        var cont : Int;
-        correct_answers = 0;
-        cont = 0;
-
-        for(answer in answers) {
-            if(answer.answer == question[cont].answer) {
-                correct_answers++;
-            }
-            cont++;
-        }
-
-        textView_answers.setText("$correct_answers/${answers.size} ${correct_answers*10}PTS");
-
+        textView_answers.setText(model.getResult());
     }
+
+override fun onStart(){
+    super.onStart()
+    Log.d(LOG_TAG, "onStart()...")
+}
+
+override fun onResume() {
+    super.onResume()
+    if(model.answersFinished()) {
+        showResult();
+    }
+    Log.d(LOG_TAG, "onResume()...")
+}
+
+override fun onPause() {
+    super.onPause()
+    Log.d(LOG_TAG, "onPause()...")
+}
+
+override fun onStop() {
+    super.onStop()
+    Log.d(LOG_TAG, "onStop()...")
+}
+
+override fun onDestroy() {
+    super.onDestroy()
+    Log.d(LOG_TAG, "onDestroy()...")
+}
 
     }
